@@ -1,7 +1,7 @@
-import { randomUUID } from "crypto";
-import { CreateTrackDto } from "../track/dto/create-track.dto";
-import { TrackI } from "src/types";
-import { UpdateTrackDto } from "../track/dto/update-track.dto";
+import { randomUUID } from 'crypto';
+import { CreateTrackDto } from '../track/dto/create-track.dto';
+import { TrackI } from 'src/types';
+import { UpdateTrackDto } from '../track/dto/update-track.dto';
 
 class TrackRecord implements TrackI {
   id: string; // uuid v4
@@ -18,14 +18,14 @@ class TrackRecord implements TrackI {
     this.duration = createTrackDto.duration;
   }
 
-  getTrack(): TrackI {
+  getTrack() {
     return {
-      id: this.id, 
+      id: this.id,
       name: this.name,
       artistId: this.artistId,
       albumId: this.albumId,
       duration: this.duration,
-    }
+    };
   }
 
   updateTrackData(updateTrackDto: UpdateTrackDto): TrackI {
@@ -34,6 +34,14 @@ class TrackRecord implements TrackI {
     this.albumId = updateTrackDto.albumId;
     this.duration = updateTrackDto.duration;
     return this.getTrack();
+  }
+
+  removeAlbumId() {
+    this.albumId = null;
+  }
+
+  removeArtistId() {
+    this.artistId = null;
   }
 }
 
@@ -45,7 +53,7 @@ class TrackDB {
 
   public addTrack(createTrackDto: CreateTrackDto) {
     const track = new TrackRecord(createTrackDto);
-    console.log(track);
+    console.log(createTrackDto);
     this.tracks.push(track);
     return track.getTrack();
   }
@@ -53,33 +61,34 @@ class TrackDB {
   public updateTrack(id: string, updateTrackDto: UpdateTrackDto) {
     const ind = this.tracks.findIndex((track) => track.id === id);
     if (ind < 0) {
-      throw new Error(`Track ${id} not found`);
+      return null;
     } else {
       this.tracks[ind].updateTrackData(updateTrackDto);
+      return this.tracks[ind].getTrack();
     }
-    return this.tracks[ind];
   }
 
   public deleteTrack(id: string) {
     const ind = this.tracks.findIndex((track) => track.id === id);
     if (ind < 0) {
-      throw new Error(`Track ${id} not found`);
+      return null;
     } else {
       this.tracks.splice(ind, 1);
+      return 'deleted';
     }
   }
 
   public getTrackById(id: string) {
     const ind = this.tracks.findIndex((track) => track.id === id);
     if (ind < 0) {
-      throw new Error(`Track ${id} not found`);
+      return null;
     } else {
-      return this.tracks[ind];
+      return this.tracks[ind].getTrack();
     }
   }
 
   public getAllTracks() {
-    return this.tracks;
+    return this.tracks.map((el) => el.getTrack());
   }
 
   public getAllTracksIds(): string[] {

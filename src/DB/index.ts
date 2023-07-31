@@ -1,21 +1,21 @@
 import AlbumDB from './album.db';
 import ArtistDB from './artist.db';
 import FavsDB from './favs.db';
-import TracksDB from './track.db';
+import TrackDB from './track.db';
 import UsersDB from './user.db';
 
 class DB {
   user: UsersDB;
   artist: ArtistDB;
   album: AlbumDB;
-  track: TracksDB;
+  track: TrackDB;
   favs: FavsDB;
 
   constructor() {
     this.user = new UsersDB();
     this.artist = new ArtistDB();
     this.album = new AlbumDB();
-    this.track = new TracksDB();
+    this.track = new TrackDB();
     this.favs = new FavsDB();
 
     const artist1 = this.artist.addArtist({ name: 'Artist1', grammy: true });

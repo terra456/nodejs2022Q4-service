@@ -28,12 +28,15 @@ export class ArtistService {
 
   remove(id: string) {
     const delArtist = db.artist.deleteArtist(id);
-    console.log(delArtist, id);
     if (delArtist === 'deleted') {
       db.album.albums.forEach((el) => {
-        console.log(el);
         if (el.artistId === id) {
           el.removeArtistId();
+        }
+      });
+      db.track.tracks.forEach((track) => {
+        if (track.artistId === id) {
+          track.removeArtistId();
         }
       });
     }
