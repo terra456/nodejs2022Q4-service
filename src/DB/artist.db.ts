@@ -44,17 +44,17 @@ class ArtistDB {
   public updateArtist(id: string, updateArtistDto: UpdateArtistDto) {
     const ind = this.artists.findIndex((artist) => artist.id === id);
     if (ind < 0) {
-      throw new Error(`Artist ${id} not found`);
+      return null;
     } else {
       this.artists[ind].updateArtistData(updateArtistDto);
+      return this.artists[ind].getArtist();
     }
-    return this.artists[ind];
   }
 
   public deleteArtist(id: string) {
     const ind = this.artists.findIndex((artist) => artist.id === id);
     if (ind < 0) {
-      throw new Error(`Artist ${id} not found`);
+      return null;
     } else {
       this.artists.splice(ind, 1);
     }
@@ -63,14 +63,14 @@ class ArtistDB {
   public getArtistById(id: string) {
     const ind = this.artists.findIndex((artist) => artist.id === id);
     if (ind < 0) {
-      throw new Error(`Artist ${id} not found`);
+      return null;
     } else {
-      return this.artists[ind];
+      return this.artists[ind].getArtist();
     }
   }
 
   public getAllArtists() {
-    return this.artists;
+    return this.artists.map((artist) => artist.getArtist());
   }
 
   public getAllArtistsIds(): string[] {
