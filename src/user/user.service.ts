@@ -1,32 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import UsersDB from './user.db';
+import db from '../DB';
+import type DB from '../DB';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UserI } from '../types';
 
 @Injectable()
 export class UserService {
-  usersDB: UsersDB;
+  db: typeof DB;
   constructor() {
-    this.usersDB = new UsersDB();
+    this.db = db;
   }
 
-  create(createUserDto: CreateUserDto) {
-    return this.usersDB.addUser(createUserDto);
+  async create(createUserDto: CreateUserDto): Promise<UserI> {
+    return await this.db.user.addUser(createUserDto);
   }
 
-  findAll() {
-    return this.usersDB.getAllUsers();
+  async findAll() {
+    return await this.db.user.getAllUsers();
   }
 
-  findOne(id: string) {
-    return this.usersDB.getUserById(id);
+  async findOne(userId: string) {
+    return db.user.getUserById(userId);
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return this.usersDB.updateUser(id, updateUserDto);
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    return this.db.user.updateUser(id, updateUserDto);
   }
 
-  remove(id: string) {
-    return this.usersDB.deleteUser(id);
+  async updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
+    return this.db.user.updateUserPassword(id, updatePasswordDto);
+  }
+
+  async remove(id: string) {
+    return this.db.user.deleteUser(id);
   }
 }
