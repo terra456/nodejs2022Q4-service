@@ -61,7 +61,7 @@ export class ArtistController {
   }
 
   @Delete(':id')
-  remove(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response,) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
     const deleted = this.artistService.remove(id);
     if (deleted === null) {
       res.status(HttpStatus.NOT_FOUND).send(`Artist ${id} not found`);

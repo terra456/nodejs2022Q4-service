@@ -27,6 +27,16 @@ export class ArtistService {
   }
 
   remove(id: string) {
-    return db.artist.deleteArtist(id);
+    const delArtist = db.artist.deleteArtist(id);
+    console.log(delArtist, id);
+    if (delArtist === 'deleted') {
+      db.album.albums.forEach((el) => {
+        console.log(el);
+        if (el.artistId === id) {
+          el.removeArtistId();
+        }
+      });
+    }
+    return delArtist;
   }
 }

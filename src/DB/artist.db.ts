@@ -57,6 +57,7 @@ class ArtistDB {
       return null;
     } else {
       this.artists.splice(ind, 1);
+      return 'deleted';
     }
   }
 

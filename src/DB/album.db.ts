@@ -1,7 +1,7 @@
-import { randomUUID } from "crypto";
-import { CreateAlbumDto } from "../album/dto/create-album.dto";
-import { AlbumI } from "src/types";
-import { UpdateAlbumDto } from "../album/dto/update-album.dto";
+import { randomUUID } from 'crypto';
+import { CreateAlbumDto } from '../album/dto/create-album.dto';
+import { AlbumI } from 'src/types';
+import { UpdateAlbumDto } from '../album/dto/update-album.dto';
 
 class AlbumRecord implements AlbumI {
   id: string; // uuid v4
@@ -18,11 +18,11 @@ class AlbumRecord implements AlbumI {
 
   getAlbum(): AlbumI {
     return {
-      id: this.id, 
+      id: this.id,
       name: this.name,
       year: this.year,
       artistId: this.artistId,
-    }
+    };
   }
 
   updateAlbumData(updateAlbumDto: UpdateAlbumDto): AlbumI {
@@ -30,6 +30,10 @@ class AlbumRecord implements AlbumI {
     this.year = updateAlbumDto.year;
     this.artistId = updateAlbumDto.artistId;
     return this.getAlbum();
+  }
+
+  removeArtistId() {
+    this.artistId = null;
   }
 }
 
@@ -48,33 +52,34 @@ class AlbumDB {
   public updateAlbum(id: string, updateAlbumDto: UpdateAlbumDto) {
     const ind = this.albums.findIndex((album) => album.id === id);
     if (ind < 0) {
-      throw new Error(`Album ${id} not found`);
+      return null;
     } else {
       this.albums[ind].updateAlbumData(updateAlbumDto);
+      return this.albums[ind].getAlbum();
     }
-    return this.albums[ind];
   }
 
   public deleteAlbum(id: string) {
     const ind = this.albums.findIndex((album) => album.id === id);
     if (ind < 0) {
-      throw new Error(`Album ${id} not found`);
+      return null;
     } else {
       this.albums.splice(ind, 1);
+      return 'deleted';
     }
   }
 
   public getAlbumById(id: string) {
     const ind = this.albums.findIndex((album) => album.id === id);
     if (ind < 0) {
-      throw new Error(`Album ${id} not found`);
+      return null;
     } else {
-      return this.albums[ind];
+      return this.albums[ind].getAlbum();
     }
   }
 
   public getAllAlbums() {
-    return this.albums;
+    return this.albums.map((el) => el.getAlbum());
   }
 
   public getAllAlbumsIds(): string[] {
