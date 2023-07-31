@@ -39,6 +39,7 @@ export class ArtistService {
           track.removeArtistId();
         }
       });
+      db.favs.deleteArtist(id);
     }
     return delArtist;
   }

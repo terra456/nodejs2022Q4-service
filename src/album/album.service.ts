@@ -34,6 +34,7 @@ export class AlbumService {
           track.removeAlbumId();
         }
       });
+      db.favs.deleteAlbum(id);
     }
     return del;
   }

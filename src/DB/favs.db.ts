@@ -13,51 +13,57 @@ class FavsDB {
     const ind = this.artists.findIndex((el) => el === id);
     if (ind < 0) {
       this.artists.push(id);
+      return 'created';
     } else {
-      throw new Error('Allready is in favorites');
+      return null;
     }
   }
 
   deleteArtist(id: string) {
     const ind = this.artists.findIndex((el) => el === id);
     if (ind < 0) {
-      throw new Error('Not such artist in favs');
+      return null;
     } else {
       this.artists.splice(ind, 1);
+      return 'deleted';
     }
   }
   addAlbum(id: string) {
     const ind = this.albums.findIndex((el) => el === id);
     if (ind < 0) {
       this.albums.push(id);
+      return 'created';
     } else {
-      throw new Error('Allready is in favorites');
+      return null;
     }
   }
 
   deleteAlbum(id: string) {
     const ind = this.albums.findIndex((el) => el === id);
     if (ind < 0) {
-      throw new Error('Not such artist in favs');
+      return null;
     } else {
       this.albums.splice(ind, 1);
+      return 'deleted';
     }
   }
   addTrack(id: string) {
     const ind = this.tracks.findIndex((el) => el === id);
     if (ind < 0) {
       this.tracks.push(id);
+      return 'created';
     } else {
-      throw new Error('Allready is in favorites');
+      return null;
     }
   }
 
   deleteTrack(id: string) {
     const ind = this.tracks.findIndex((el) => el === id);
     if (ind < 0) {
-      throw new Error('Not such artist in favs');
+      return null;
     } else {
       this.tracks.splice(ind, 1);
+      return 'deleted';
     }
   }
 }

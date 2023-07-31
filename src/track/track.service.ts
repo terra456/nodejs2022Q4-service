@@ -28,6 +28,9 @@ export class TrackService {
 
   remove(id: string) {
     const del = db.track.deleteTrack(id);
+    if (del !== null) {
+      db.favs.deleteTrack(id);
+    }
     return del;
   }
 }
