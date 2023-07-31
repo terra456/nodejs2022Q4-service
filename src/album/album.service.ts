@@ -27,6 +27,14 @@ export class AlbumService {
   }
 
   remove(id: string) {
-    return db.album.deleteAlbum(id);
+    const del = db.album.deleteAlbum(id);
+    if (del !== null) {
+      db.track.tracks.forEach((track) => {
+        if (track.albumId === id) {
+          track.removeAlbumId();
+        }
+      });
+    }
+    return del;
   }
 }

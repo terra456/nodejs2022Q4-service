@@ -22,7 +22,8 @@ export class AlbumController {
 
   @Post()
   create(
-    @Body(new ValidationPipe()) createAlbumDto: CreateAlbumDto,
+    @Body(new ValidationPipe({ skipMissingProperties: true }))
+    createAlbumDto: CreateAlbumDto,
     @Res() res: Response,
   ) {
     const newAlbum = this.albumService.create(createAlbumDto);
