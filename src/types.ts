@@ -3,16 +3,16 @@ export interface UserI {
   login: string;
   password: string;
   version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number | null; // timestamp of last update
+  createdAt: number | Date; // timestamp of creation
+  updatedAt: number | Date; // timestamp of last update
 }
 
 export interface UserSequreI {
   id: string; // uuid v4
   login: string;
   version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number | null; // timestamp of last update
+  createdAt: number | Date; // timestamp of creation
+  updatedAt: number | Date; // timestamp of last update
 }
 
 export interface ArtistI {

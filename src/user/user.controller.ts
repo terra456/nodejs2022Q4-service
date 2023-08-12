@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserI } from 'src/types';
 import { Response } from 'express';
@@ -84,10 +83,10 @@ export class UserController {
       throw new HttpException(`User ${id} not found`, HttpStatus.NOT_FOUND);
     } else {
       if (user.password === updatePasswordDto.oldPassword) {
-        const newUser = await this.userService.updatePassword(
-          id,
-          updatePasswordDto,
-        );
+        const newUser = await this.userService.updatePassword(id, {
+          password: updatePasswordDto.newPassword,
+          version: user.version + 1,
+        });
         res.status(HttpStatus.OK).json({
           id: newUser.id,
           login: newUser.login,

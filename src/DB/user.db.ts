@@ -32,7 +32,7 @@ class UserRecord implements UserI {
   }
 
   updateUserData(updateUserDto: UpdateUserDto): UserSequreI {
-    this.login = updateUserDto.login;
+    // this.login = updateUserDto.login;
     this.version += 1;
     this.updatedAt = Date.now();
     return this.getUser();
