@@ -21,23 +21,26 @@ export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  create(
+  async create(
     @Body(new ValidationPipe({ skipMissingProperties: true }))
     createAlbumDto: CreateAlbumDto,
     @Res() res: Response,
   ) {
-    const newAlbum = this.albumService.create(createAlbumDto);
+    const newAlbum = await this.albumService.create(createAlbumDto);
     res.status(HttpStatus.CREATED).json(newAlbum);
   }
 
   @Get()
-  findAll() {
-    return this.albumService.findAll();
+  async findAll() {
+    return await this.albumService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
-    const album = this.albumService.findOne(id);
+  async findOne(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    const album = await this.albumService.findOne(id);
     if (album === null) {
       res.status(HttpStatus.NOT_FOUND).send(`Album ${id} not found`);
     } else {
@@ -46,26 +49,29 @@ export class AlbumController {
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body(new ValidationPipe()) updateAlbumDto: UpdateAlbumDto,
     @Res() res: Response,
   ) {
-    const album = this.albumService.update(id, updateAlbumDto);
-    if (album === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} not found`);
-    } else {
+    try {
+      const album = await this.albumService.update(id, updateAlbumDto);
       res.status(HttpStatus.OK).json(album);
+    } catch {
+      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} not found`);
     }
   }
 
   @Delete(':id')
-  remove(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
-    const deleted = this.albumService.remove(id);
-    if (deleted === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} not found`);
-    } else {
+  async remove(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.albumService.remove(id);
       res.status(HttpStatus.NO_CONTENT).send();
+    } catch {
+      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} not found`);
     }
   }
 }

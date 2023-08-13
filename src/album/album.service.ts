@@ -1,41 +1,45 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import db from '../DB';
-import type DB from '../DB';
+import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class AlbumService {
-  db: typeof DB;
-  constructor() {
-    this.db = db;
-  }
-  create(createAlbumDto: CreateAlbumDto) {
-    return db.album.addAlbum(createAlbumDto);
+  constructor(private prisma: PrismaService) {}
+
+  async create(createAlbumDto: CreateAlbumDto) {
+    return await this.prisma.album.create({
+      data: { ...createAlbumDto },
+    });
   }
 
-  findAll() {
-    return db.album.getAllAlbums();
+  async findAll() {
+    return await this.prisma.album.findMany();
   }
 
-  findOne(id: string) {
-    return db.album.getAlbumById(id);
+  async findOne(id: string) {
+    return this.prisma.album.findUnique({
+      where: { id },
+    });
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    return db.album.updateAlbum(id, updateAlbumDto);
+  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    return this.prisma.album.update({
+      where: { id },
+      data: { ...updateAlbumDto },
+    });
   }
 
-  remove(id: string) {
-    const del = db.album.deleteAlbum(id);
-    if (del !== null) {
-      db.track.tracks.forEach((track) => {
-        if (track.albumId === id) {
-          track.removeAlbumId();
-        }
-      });
-      db.favs.deleteAlbum(id);
-    }
-    return del;
+  async remove(id: string) {
+    return this.prisma.album.delete({ where: { id } });
+    // if (del !== null) {
+    //   db.track.tracks.forEach((track) => {
+    //     if (track.albumId === id) {
+    //       track.removeAlbumId();
+    //     }
+    //   });
+    //   db.favs.deleteAlbum(id);
+    // }
+    // return del;
   }
 }

@@ -3,12 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseUUIDPipe,
   ValidationPipe,
-  HttpCode,
   Res,
   HttpStatus,
   Put,
@@ -23,11 +21,11 @@ export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Post()
-  create(
+  async create(
     @Body(new ValidationPipe()) createArtistDto: CreateArtistDto,
     @Res() res: Response,
   ) {
-    const newArtist = this.artistService.create(createArtistDto);
+    const newArtist = await this.artistService.create(createArtistDto);
     res.status(HttpStatus.CREATED).json(newArtist);
   }
 
@@ -37,36 +35,46 @@ export class ArtistController {
   }
 
   @Get(':id')
-  findOne(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
-    const artist = this.artistService.findOne(id);
-    if (artist === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Artist ${id} not found`);
-    } else {
-      res.status(HttpStatus.OK).json(artist);
+  async findOne(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const artist = await this.artistService.findOne(id);
+      if (artist === null) {
+        res.status(HttpStatus.NOT_FOUND).send(`Artist ${id} not found`);
+      } else {
+        res.status(HttpStatus.OK).json(artist);
+      }
+    } catch {
+      res.status(HttpStatus.FORBIDDEN).send();
     }
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body(new ValidationPipe()) updateArtistDto: UpdateArtistDto,
     @Res() res: Response,
   ) {
-    const artist = this.artistService.update(id, updateArtistDto);
-    if (artist === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Artist ${id} not found`);
-    } else {
+    try {
+      const artist = await this.artistService.update(id, updateArtistDto);
       res.status(HttpStatus.OK).json(artist);
+    } catch {
+      res.status(HttpStatus.NOT_FOUND).send(`Artist ${id} not found`);
     }
   }
 
   @Delete(':id')
-  remove(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
-    const deleted = this.artistService.remove(id);
-    if (deleted === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Artist ${id} not found`);
-    } else {
+  async remove(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.artistService.remove(id);
       res.status(HttpStatus.NO_CONTENT).send();
+    } catch {
+      res.status(HttpStatus.NOT_FOUND).send(`Artist ${id} not found`);
     }
   }
 }

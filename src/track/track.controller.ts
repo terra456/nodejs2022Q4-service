@@ -21,53 +21,73 @@ export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Post()
-  create(
+  async create(
     @Body(new ValidationPipe({ skipMissingProperties: true }))
     createTrackDto: CreateTrackDto,
     @Res() res: Response,
   ) {
-    const newTrack = this.trackService.create(createTrackDto);
-    console.log('new');
-    res.status(HttpStatus.CREATED).json(newTrack);
+    try {
+      const newTrack = await this.trackService.create(createTrackDto);
+      if (newTrack) {
+        res.status(HttpStatus.CREATED).json(newTrack);
+      } else {
+        throw new Error();
+      }
+    } catch {
+      res.status(HttpStatus.FORBIDDEN).send();
+    }
   }
 
   @Get()
-  findAll() {
-    return this.trackService.findAll();
+  async findAll() {
+    return await this.trackService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
-    const track = this.trackService.findOne(id);
-    console.log(track);
-    if (track === null) {
+  async findOne(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const track = await this.trackService.findOne(id);
+      if (track) {
+        res.status(HttpStatus.OK).json(track);
+      } else {
+        throw new Error();
+      }
+    } catch {
       res.status(HttpStatus.NOT_FOUND).send(`Track ${id} not found`);
-    } else {
-      res.status(HttpStatus.OK).json(track);
     }
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body(new ValidationPipe()) updateTrackDto: UpdateTrackDto,
     @Res() res: Response,
   ) {
-    const track = this.trackService.update(id, updateTrackDto);
-    if (track === null) {
+    try {
+      const track = await this.trackService.update(id, updateTrackDto);
+      if (track) {
+        res.status(HttpStatus.OK).json(track);
+      } else {
+        throw new Error();
+      }
+    } catch {
       res.status(HttpStatus.NOT_FOUND).send(`Track ${id} not found`);
-    } else {
-      res.status(HttpStatus.OK).json(track);
     }
   }
 
   @Delete(':id')
-  remove(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
-    const deleted = this.trackService.remove(id);
-    if (deleted === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Track ${id} not found`);
-    } else {
+  async remove(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.trackService.remove(id);
       res.status(HttpStatus.NO_CONTENT).send();
+    } catch {
+      res.status(HttpStatus.NOT_FOUND).send(`Track ${id} not found`);
     }
   }
 }

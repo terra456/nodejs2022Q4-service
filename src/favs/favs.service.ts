@@ -1,45 +1,147 @@
 import { Injectable } from '@nestjs/common';
-import db from '../DB';
-import type DB from '../DB';
+import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class FavsService {
-  db: typeof DB;
-  constructor() {
-    this.db = db;
+  favsId: string;
+  userId: string;
+  constructor(private prisma: PrismaService) {
+    this.start();
   }
 
-  findAll() {
-    return db.getAllFavorites();
+  async start() {
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          login: 'Test',
+          password: 'ierjower',
+          version: 1,
+          createdAt: new Date(Date.now()),
+          updatedAt: new Date(Date.now()),
+        },
+      });
+      this.userId = user.id;
+      const favs = await this.prisma.favorites.create({
+        data: {
+          userId: this.userId,
+          artists: [],
+          albums: [],
+          tracks: [],
+        },
+      });
+      this.favsId = favs.userId;
+    } catch {
+      return;
+    }
   }
 
-  findTrack(id: string) {
-    return db.track.getTrackById(id);
-  }
-  findAlbum(id: string) {
-    return db.album.getAlbumById(id);
-  }
-  findArtist(id: string) {
-    return db.artist.getArtistById(id);
+  async findAll(userId = this.userId) {
+    return await this.prisma.favorites.findUnique({
+      where: { userId },
+    });
   }
 
-  addTrack(id: string) {
-    return db.favs.addTrack(id);
+  async findTrack(id: string) {
+    return this.prisma.track.findUnique({
+      where: { id },
+    });
   }
-  addAlbum(id: string) {
-    return db.favs.addAlbum(id);
+  async findAlbum(id: string) {
+    return this.prisma.album.findUnique({
+      where: { id },
+    });
   }
-  addArtist(id: string) {
-    return db.favs.addArtist(id);
+  async findArtist(id: string) {
+    return this.prisma.artist.findUnique({
+      where: { id },
+    });
   }
 
-  removeTrack(id: string) {
-    return db.favs.deleteTrack(id);
+  async addTrack(id: string, userId = this.userId) {
+    return this.prisma.favorites.update({
+      where: { userId },
+      data: {
+        tracks: { push: id },
+      },
+    });
   }
-  removeArtist(id: string) {
-    return db.favs.deleteArtist(id);
+  async addAlbum(id: string, userId = this.userId) {
+    return this.prisma.favorites.update({
+      where: { userId },
+      data: {
+        albums: { push: id },
+      },
+    });
   }
-  removeAlbum(id: string) {
-    return db.favs.deleteAlbum(id);
+  async addArtist(id: string, userId = this.userId) {
+    return this.prisma.favorites.update({
+      where: { userId },
+      data: {
+        artists: { push: id },
+      },
+    });
+  }
+
+  async removeTrack(idToDel: string, userId = this.userId) {
+    const favs = await this.prisma.favorites.findUnique({
+      where: { userId },
+    });
+    const ind = favs.tracks.findIndex((el) => el === idToDel);
+    if (ind > 0) {
+      favs.tracks.splice(ind, 1);
+      const newTracsArr = favs.tracks;
+      return this.prisma.favorites.update({
+        where: { userId },
+        data: {
+          tracks: {
+            set: newTracsArr,
+          },
+        },
+      });
+    } else {
+      throw new Error();
+    }
+  }
+
+  async removeAlbum(idToDel: string, userId = this.userId) {
+    const favs = await this.prisma.favorites.findUnique({
+      where: { userId },
+    });
+    const ind = favs.albums.findIndex((el) => el === idToDel);
+    if (ind > 0) {
+      favs.albums.splice(ind, 1);
+      const newAlbumsArr = favs.albums;
+      return this.prisma.favorites.update({
+        where: { userId },
+        data: {
+          albums: {
+            set: newAlbumsArr,
+          },
+        },
+      });
+    } else {
+      throw new Error();
+    }
+  }
+
+  async removeArtist(idToDel: string, userId = this.userId) {
+    const favs = await this.prisma.favorites.findUnique({
+      where: { userId },
+    });
+    const ind = favs.artists.findIndex((el) => el === idToDel);
+    if (ind > 0) {
+      favs.artists.splice(ind, 1);
+      const newArtistsArr = favs.artists;
+      return this.prisma.favorites.update({
+        where: { userId },
+        data: {
+          artists: {
+            set: newArtistsArr,
+          },
+        },
+      });
+    } else {
+      throw new Error();
+    }
   }
 }

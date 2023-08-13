@@ -4,9 +4,9 @@ import { IsNumber, IsString, IsUUID } from 'class-validator';
 
 export class UpdateAlbumDto extends PartialType(CreateAlbumDto) {
   @IsString()
-  name: string;
+  name?: string;
   @IsNumber()
-  year: number;
+  year?: number;
   @IsUUID()
   artistId?: string | null;
 }

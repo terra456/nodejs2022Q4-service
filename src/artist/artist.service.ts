@@ -1,46 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import db from '../DB';
-import type DB from '../DB';
+import { PrismaService } from '../database/prisma.service';
+import { Artist } from '@prisma/client';
 
 @Injectable()
 export class ArtistService {
-  db: typeof DB;
-  constructor() {
-    this.db = db;
-  }
-  create(createArtistDto: CreateArtistDto) {
-    return db.artist.addArtist(createArtistDto);
+  constructor(private prisma: PrismaService) {}
+
+  async create(createArtistDto: CreateArtistDto) {
+    return await this.prisma.artist.create({
+      data: { ...createArtistDto },
+    });
   }
 
-  findAll() {
-    return db.artist.getAllArtists();
+  async findAll() {
+    return await this.prisma.artist.findMany();
   }
 
-  findOne(id: string) {
-    return db.artist.getArtistById(id);
+  async findOne(id: string) {
+    return await this.prisma.artist.findUnique({
+      where: { id },
+    });
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    return db.artist.updateArtist(id, updateArtistDto);
+  async update(id: string, updateArtistDto: UpdateArtistDto) {
+    return await this.prisma.artist.update({
+      where: { id },
+      data: { ...updateArtistDto },
+    });
   }
 
-  remove(id: string) {
-    const delArtist = db.artist.deleteArtist(id);
-    if (delArtist === 'deleted') {
-      db.album.albums.forEach((el) => {
-        if (el.artistId === id) {
-          el.removeArtistId();
-        }
-      });
-      db.track.tracks.forEach((track) => {
-        if (track.artistId === id) {
-          track.removeArtistId();
-        }
-      });
-      db.favs.deleteArtist(id);
-    }
-    return delArtist;
+  async remove(id: string) {
+    return await this.prisma.artist.delete({ where: { id } });
   }
 }
