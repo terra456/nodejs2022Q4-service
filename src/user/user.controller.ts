@@ -3,22 +3,30 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseUUIDPipe,
   ValidationPipe,
   HttpException,
   HttpStatus,
-  HttpCode,
   Put,
   Res,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { UserI } from 'src/types';
 import { Response } from 'express';
+import { User } from '@prisma/client';
+
+function formatUserData(data: User) {
+  return {
+    id: data.id,
+    login: data.login,
+    version: data.version,
+    createdAt: Date.parse(data.createdAt.toString()),
+    updatedAt: Date.parse(data.updatedAt.toString()),
+  };
+}
 
 @Controller('user')
 export class UserController {
@@ -29,26 +37,14 @@ export class UserController {
     @Body(new ValidationPipe()) createUserDto: CreateUserDto,
     @Res() res: Response,
   ) {
-    const user: UserI = await this.userService.create(createUserDto);
-    res.status(HttpStatus.CREATED).json({
-      id: user.id,
-      login: user.login,
-      version: user.version,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    });
+    const user: User = await this.userService.create(createUserDto);
+    res.status(HttpStatus.CREATED).json(formatUserData(user));
   }
 
   @Get()
   async findAll(@Res() res: Response) {
-    const users = (await this.userService.findAll()).map((res) => {
-      return {
-        id: res.id,
-        login: res.login,
-        version: res.version,
-        createdAt: res.createdAt,
-        updatedAt: res.updatedAt,
-      };
+    const users = (await this.userService.findAll()).map((el) => {
+      return formatUserData(el);
     });
     res.status(HttpStatus.OK).json(users);
   }
@@ -62,13 +58,7 @@ export class UserController {
     if (user === null) {
       throw new HttpException(`User ${id} not found`, HttpStatus.NOT_FOUND);
     } else {
-      res.status(HttpStatus.OK).json({
-        id: user.id,
-        login: user.login,
-        version: user.version,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      });
+      res.status(HttpStatus.OK).json(formatUserData(user));
     }
   }
 
@@ -85,15 +75,8 @@ export class UserController {
       if (user.password === updatePasswordDto.oldPassword) {
         const newUser = await this.userService.updatePassword(id, {
           password: updatePasswordDto.newPassword,
-          version: user.version + 1,
         });
-        res.status(HttpStatus.OK).json({
-          id: newUser.id,
-          login: newUser.login,
-          version: newUser.version,
-          createdAt: newUser.createdAt,
-          updatedAt: newUser.updatedAt,
-        });
+        res.status(HttpStatus.OK).json(formatUserData(newUser));
       } else {
         throw new HttpException(`Password is wrong`, HttpStatus.FORBIDDEN);
       }
@@ -105,11 +88,11 @@ export class UserController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Res() res: Response,
   ) {
-    const user = await this.userService.remove(id);
-    if (user === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`User ${id} not found`);
-    } else {
+    try {
+      await this.userService.remove(id);
       res.status(HttpStatus.NO_CONTENT).send();
+    } catch {
+      res.status(HttpStatus.NOT_FOUND).send(`User ${id} not found`);
     }
   }
 }

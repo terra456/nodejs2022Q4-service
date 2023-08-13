@@ -3,8 +3,8 @@ export interface UserI {
   login: string;
   password: string;
   version: number; // integer number, increments on update
-  createdAt: number | Date; // timestamp of creation
-  updatedAt: number | Date; // timestamp of last update
+  createdAt: string; // timestamp of creation
+  updatedAt: string; // timestamp of last update
 }
 
 export interface UserSequreI {

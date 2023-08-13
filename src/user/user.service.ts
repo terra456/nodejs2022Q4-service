@@ -1,24 +1,21 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserI } from '../types';
 import { PrismaService } from '../database/prisma.service';
-import { User, Prisma } from '@prisma/client';
-import { randomUUID } from 'crypto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto): Promise<User | null> {
-    const d = new Date(Date.now());
+    const d = Date.now() - 1000;
     return await this.prisma.user.create({
       data: {
-        id: randomUUID(),
-        version: 1,
-        createdAt: d.toISOString(),
-        updatedAt: d.toISOString(),
         ...createUserDto,
+        version: 1,
+        createdAt: new Date(d),
+        updatedAt: new Date(d),
       },
     });
   }
@@ -37,12 +34,14 @@ export class UserService {
     return this.prisma.user.update({
       data: {
         ...updateUserDto,
+        updatedAt: new Date(Date.now()),
+        version: { increment: 1 },
       },
       where: { id },
     });
   }
 
   async remove(id: string) {
-    return this.prisma.user.delete({ where: { id } });
+    return this.prisma.user.delete({ where: { id: id } });
   }
 }

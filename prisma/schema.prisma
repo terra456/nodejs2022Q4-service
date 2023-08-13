@@ -11,37 +11,45 @@ datasource db {
 }
 
 model User {
-  id        String   @unique
-  login     String
-  password  String
+  id        String   @id @default(uuid())
+  login     String   @db.VarChar(255)
+  password  String   @db.VarChar(255)
   version   Int
   createdAt DateTime
   updatedAt DateTime
+  favorites Favorites[]
 }
 
 model Artist {
-  id        String   @unique
-  name      String
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
   grammy    Boolean
+  albums    Album[]
+  tracs     Track[]
 }
 
 model Album {
-  id        String   @unique
-  name      String
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
   year      Int
+  artist    Artist   @relation(fields: [artistId], references: [id])
   artistId  String
+  tracs     Track[]
 }
 
 model Track {
-  id        String   @unique
-  name      String
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
   duration  Int
+  artist    Artist?    @relation(fields: [artistId], references: [id])
   artistId  String
+  album     Album?    @relation(fields: [albumId], references: [id])
   albumId   String
 }
 
 model Favorites {
-  id        String   @unique
+  id        String   @id @unique @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
   userId    String
   artists   String[]
   albums    String[]

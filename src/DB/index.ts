@@ -2,17 +2,14 @@ import AlbumDB from './album.db';
 import ArtistDB from './artist.db';
 import FavsDB from './favs.db';
 import TrackDB from './track.db';
-import UsersDB from './user.db';
 
 class DB {
-  user: UsersDB;
   artist: ArtistDB;
   album: AlbumDB;
   track: TrackDB;
   favs: FavsDB;
 
   constructor() {
-    this.user = new UsersDB();
     this.artist = new ArtistDB();
     this.album = new AlbumDB();
     this.track = new TrackDB();
