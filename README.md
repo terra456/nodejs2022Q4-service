@@ -23,9 +23,27 @@ npm install
 npm start
 ```
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+# Run application in docker conteiner
+
+Rename .env.copy file to .env
+```
+mv .env.copy .env
+```
+
+Create volume for postgress DB
+```
+docker volume create --name=pgdata
+```
+
+If will be an error "Permission denied" at next step change access permissions
+```
+sudo chmod -R 777 pgdata
+```
+
+Build an image
+```
+docker-compose up --build
+```
 
 ## Testing
 
