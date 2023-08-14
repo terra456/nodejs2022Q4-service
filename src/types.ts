@@ -57,4 +57,3 @@ export interface FavoritesResponseI {
   albums: AlbumI[];
   tracks: TrackI[];
 }
-
