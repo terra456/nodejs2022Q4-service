@@ -8,7 +8,13 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone git@github.com:terra456/nodejs2022Q4-service.git
+```
+
+## Change branch to "part2"
+
+```
+git checkout remotes/part2
 ```
 
 ## Installing NPM modules
@@ -23,9 +29,27 @@ npm install
 npm start
 ```
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+# Run application in docker conteiner
+
+Rename .env.copy file to .env
+```
+cp .env.copy .env
+```
+
+Build an image
+```
+docker-compose up --build
+```
+
+If volume did not created, create it (I dont know how it will be work in windows, because there is no different access permissions).
+```
+docker volume create --name=pgdata
+```
+
+If will be an error "Permission denied" change access permissions (there must be better way for security, it's the simplest and unsafe solution).
+```
+sudo chmod -R 777 pgdata
+```
 
 ## Testing
 

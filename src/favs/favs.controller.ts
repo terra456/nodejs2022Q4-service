@@ -10,101 +10,153 @@ import {
 } from '@nestjs/common';
 import { FavsService } from './favs.service';
 import { Response } from 'express';
+import { Album, Artist, Track } from '@prisma/client';
 
 @Controller('favs')
 export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 
   @Get()
-  findAll() {
-    return this.favsService.findAll();
+  async findAll(@Res() res: Response) {
+    try {
+      const favs = await this.favsService.findAll();
+      const artists = favs.artists.map(async (el) => {
+        return await this.favsService.findArtist(el);
+      });
+      const albums = favs.albums.map(async (el) => {
+        return await this.favsService.findAlbum(el);
+      });
+      const tracks = favs.tracks.map(async (el) => {
+        return await this.favsService.findTrack(el);
+      });
+      const favsResult: {
+        artists: Artist[];
+        albums: Album[];
+        tracks: Track[];
+      } = {
+        artists: [],
+        albums: [],
+        tracks: [],
+      };
+      Promise.allSettled([
+        Promise.allSettled(artists).then((results) => {
+          favsResult.artists = results
+            .map((el) => {
+              return el.status === 'fulfilled' ? el.value : null;
+            })
+            .filter((el) => el !== null);
+        }),
+        Promise.allSettled(albums).then((results) => {
+          favsResult.albums = results
+            .map((el) => {
+              return el.status === 'fulfilled' ? el.value : null;
+            })
+            .filter((el) => el !== null);
+        }),
+        Promise.allSettled(tracks).then((results) => {
+          favsResult.tracks = results
+            .map((el) => {
+              return el.status === 'fulfilled' ? el.value : null;
+            })
+            .filter((el) => el !== null);
+        }),
+      ]).then(() => res.status(HttpStatus.OK).json(favsResult));
+    } catch {
+      res.status(HttpStatus.FORBIDDEN).send(`Mistake`);
+      return;
+    }
   }
 
   @Post('track/:id')
-  addTrack(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
-    const track = this.favsService.findTrack(id);
+  async addTrack(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    const track = await this.favsService.findTrack(id);
     if (track === null) {
-      console.log('track', id);
       res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Track ${id} not found`);
     } else {
-      const newFawTrack = this.favsService.addTrack(id);
-      if (newFawTrack === 'created') {
-        res.status(HttpStatus.CREATED).send(`Track ${id} added to favorites`);
+      const newFawTrack = await this.favsService.addTrack(id);
+      if (newFawTrack.tracks.includes(id)) {
+        res.status(HttpStatus.CREATED).json(track);
       } else {
         res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Track not add`);
       }
     }
   }
   @Post('album/:id')
-  addAlbum(@Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
-    const album = this.favsService.findAlbum(id);
+  async addAlbum(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    const album = await this.favsService.findAlbum(id);
     if (album === null) {
-      console.log('album', id);
-      res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Track ${id} not found`);
+      res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Album ${id} not found`);
     } else {
-      const newFawAlbum = this.favsService.addAlbum(id);
-      if (newFawAlbum === 'created') {
-        res.status(HttpStatus.CREATED).send(`Track ${id} added to favorites`);
+      const newFawAlbum = await this.favsService.addAlbum(id);
+      if (newFawAlbum.albums.includes(id)) {
+        res.status(HttpStatus.CREATED).json(album);
       } else {
-        res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Track not add`);
+        res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Album not add`);
       }
     }
   }
   @Post('artist/:id')
-  addArtist(
+  async addArtist(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Res() res: Response,
   ) {
-    const artist = this.favsService.findArtist(id);
+    const artist = await this.favsService.findArtist(id);
     if (artist === null) {
-      console.log('artist', id);
-      res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Track ${id} not found`);
+      res
+        .status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .send(`Artist ${id} not found`);
     } else {
-      const newFawArtist = this.favsService.addArtist(id);
-      if (newFawArtist === 'created') {
-        res.status(HttpStatus.CREATED).send(`Track ${id} added to favorites`);
+      const newFawArtist = await this.favsService.addArtist(id);
+      if (newFawArtist.artists.includes(id)) {
+        res.status(HttpStatus.CREATED).json(artist);
       } else {
-        res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Track not add`);
+        res.status(HttpStatus.UNPROCESSABLE_ENTITY).send(`Artist not add`);
       }
     }
   }
 
   @Delete('track/:id')
-  removeTrack(
+  async removeTrack(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Res() res: Response,
   ) {
-    const del = this.favsService.removeTrack(id);
-    if (del === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Track ${id} was not in favorites`);
-    } else {
+    try {
+      await this.favsService.removeTrack(id);
       res.status(HttpStatus.NO_CONTENT).send();
+    } catch {
+      res.status(HttpStatus.NOT_FOUND).send(`Track ${id} was not in favorites`);
     }
   }
   @Delete('artist/:id')
-  removeArtist(
+  async removeArtist(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Res() res: Response,
   ) {
-    const del = this.favsService.removeArtist(id);
-    if (del === null) {
+    try {
+      await this.favsService.removeArtist(id);
+      res.status(HttpStatus.NO_CONTENT).send();
+    } catch {
       res
         .status(HttpStatus.NOT_FOUND)
         .send(`Artist ${id} was not in favorites`);
-    } else {
-      res.status(HttpStatus.NO_CONTENT).send();
     }
   }
   @Delete('album/:id')
-  removeAlbum(
+  async removeAlbum(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Res() res: Response,
   ) {
-    const del = this.favsService.removeAlbum(id);
-    if (del === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} was not in favorites`);
-    } else {
+    try {
+      await this.favsService.removeAlbum(id);
       res.status(HttpStatus.NO_CONTENT).send();
+    } catch {
+      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} was not in favorites`);
     }
   }
 }
