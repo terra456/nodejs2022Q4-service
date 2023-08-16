@@ -8,7 +8,13 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone git@github.com:terra456/nodejs2022Q4-service.git
+```
+
+## Change branch to "part2"
+
+```
+git checkout remotes/part2
 ```
 
 ## Installing NPM modules
@@ -27,22 +33,22 @@ npm start
 
 Rename .env.copy file to .env
 ```
-mv .env.copy .env
-```
-
-Create volume for postgress DB
-```
-docker volume create --name=pgdata
-```
-
-If will be an error "Permission denied" at next step change access permissions
-```
-sudo chmod -R 777 pgdata
+cp .env.copy .env
 ```
 
 Build an image
 ```
 docker-compose up --build
+```
+
+If volume did not created, create it (I dont know how it will be work in windows, because there is no different access permissions).
+```
+docker volume create --name=pgdata
+```
+
+If will be an error "Permission denied" change access permissions (there must be better way for security, it's the simplest and unsafe solution).
+```
+sudo chmod -R 777 pgdata
 ```
 
 ## Testing
