@@ -16,11 +16,11 @@ class LoggerMiddleware implements NestMiddleware {
         body ? 'Body: ' + JSON.stringify(body) + '\n' : ''
       } Response: ${statusCode} ${statusMessage}`;
 
-      if (statusCode >= 500) {
+      if (statusCode >= 400) {
         return this.logger.error(message);
       }
 
-      if (statusCode >= 400) {
+      if (statusCode >= 300) {
         return this.logger.warn(message);
       }
 

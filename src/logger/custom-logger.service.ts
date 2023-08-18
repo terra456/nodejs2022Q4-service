@@ -14,6 +14,7 @@ export class CustomLogger implements LoggerService {
    */
   error(message: any, ...optionalParams: any[]) {
     this.writeInFile('error: ' + message);
+    this.writeErrors(message.toString());
   }
 
   /**
@@ -42,6 +43,19 @@ export class CustomLogger implements LoggerService {
       })
       .catch((e) => {
         writeFile('./logs.txt', message + '\n').then(() =>
+          console.log('file created'),
+        );
+      });
+  }
+  private async writeErrors(message: string) {
+    access('./logs-error.txt', constants.R_OK | constants.W_OK)
+      .then(() => {
+        appendFile('./logs-error.txt', message + '\n').then(() =>
+          process.stdout.write(message + '\n'),
+        );
+      })
+      .catch((e) => {
+        writeFile('./logs-error.txt', message + '\n').then(() =>
           console.log('file created'),
         );
       });
