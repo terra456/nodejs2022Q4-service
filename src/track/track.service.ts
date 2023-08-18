@@ -32,9 +32,5 @@ export class TrackService {
 
   async remove(id: string) {
     return await this.prisma.track.delete({ where: { id } });
-    // if (del !== null) {
-    //   db.favs.deleteTrack(id);
-    // }
-    // return del;
   }
 }

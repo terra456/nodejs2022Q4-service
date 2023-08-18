@@ -5,38 +5,46 @@ import { PrismaService } from '../database/prisma.service';
 export class FavsService {
   favsId: string;
   userId: string;
-  constructor(private prisma: PrismaService) {
-    this.start();
-  }
+  constructor(private prisma: PrismaService) {}
 
   async start() {
     try {
-      const user = await this.prisma.user.create({
-        data: {
-          login: 'Test',
-          password: 'ierjower',
-          version: 1,
-          createdAt: new Date(Date.now()),
-          updatedAt: new Date(Date.now()),
-        },
+      let user = await this.prisma.user.findFirst({
+        where: { login: 'FavUser' },
       });
-      this.userId = user.id;
-      const favs = await this.prisma.favorites.create({
-        data: {
-          userId: this.userId,
-          artists: [],
-          albums: [],
-          tracks: [],
-        },
-      });
-      this.favsId = favs.userId;
+      if (!user) {
+        user = await this.prisma.user.create({
+          data: {
+            login: 'FavUser',
+            password: 'ierjower',
+            version: 1,
+            createdAt: new Date(Date.now()),
+            updatedAt: new Date(Date.now()),
+          },
+        });
+        this.userId = user.id;
+        const favs = await this.prisma.favorites.create({
+          data: {
+            userId: this.userId,
+            artists: [],
+            albums: [],
+            tracks: [],
+          },
+        });
+        this.favsId = favs.userId;
+      } else {
+        const favs = await this.prisma.favorites.findFirst({
+          where: { userId: this.userId },
+        });
+        this.favsId = favs.userId;
+      }
     } catch {
       return;
     }
   }
 
   async findAll(userId = this.userId) {
-    return await this.prisma.favorites.findUnique({
+    return await this.prisma.favorites.findFirst({
       where: { userId },
     });
   }
@@ -83,7 +91,7 @@ export class FavsService {
   }
 
   async removeTrack(idToDel: string, userId = this.userId) {
-    const favs = await this.prisma.favorites.findUnique({
+    const favs = await this.prisma.favorites.findFirst({
       where: { userId },
     });
     const ind = favs.tracks.findIndex((el) => el === idToDel);
@@ -104,7 +112,7 @@ export class FavsService {
   }
 
   async removeAlbum(idToDel: string, userId = this.userId) {
-    const favs = await this.prisma.favorites.findUnique({
+    const favs = await this.prisma.favorites.findFirst({
       where: { userId },
     });
     const ind = favs.albums.findIndex((el) => el === idToDel);
@@ -125,7 +133,7 @@ export class FavsService {
   }
 
   async removeArtist(idToDel: string, userId = this.userId) {
-    const favs = await this.prisma.favorites.findUnique({
+    const favs = await this.prisma.favorites.findFirst({
       where: { userId },
     });
     const ind = favs.artists.findIndex((el) => el === idToDel);

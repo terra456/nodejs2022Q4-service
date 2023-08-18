@@ -16,14 +16,18 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     const token = await this.jwtService.signAsync({
-      sub: user.id,
-      username: user.login,
+      userId: user.id,
+      login: user.login,
     });
-    return { access_token: token };
+    return { accessToken: token };
   }
 
   async signUp(signUnDto: SignInDto): Promise<any> {
     const { password, ...user } = await this.userService.create(signUnDto);
     return user;
+  }
+
+  async delAll(): Promise<any> {
+    return await this.userService.removeMany();
   }
 }

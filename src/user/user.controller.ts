@@ -37,8 +37,17 @@ export class UserController {
     @Body(new ValidationPipe()) createUserDto: CreateUserDto,
     @Res() res: Response,
   ) {
-    const user: User = await this.userService.create(createUserDto);
-    res.status(HttpStatus.CREATED).json(formatUserData(user));
+    try {
+      const user: User = await this.userService.create(createUserDto);
+      if (user) {
+        console.log(user);
+        res.status(HttpStatus.CREATED).json(formatUserData(user));
+      } else {
+        res.status(HttpStatus.FORBIDDEN).send();
+      }
+    } catch {
+      res.status(HttpStatus.FORBIDDEN).send();
+    }
   }
 
   @Get()
@@ -54,11 +63,15 @@ export class UserController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Res() res: Response,
   ) {
-    const user = await this.userService.findOne(id);
-    if (user === null) {
-      throw new HttpException(`User ${id} not found`, HttpStatus.NOT_FOUND);
-    } else {
-      res.status(HttpStatus.OK).json(formatUserData(user));
+    try {
+      const user = await this.userService.findOne(id);
+      if (user) {
+        res.status(HttpStatus.OK).json(formatUserData(user));
+      } else {
+        res.status(HttpStatus.NOT_FOUND).send(`User ${id} not found`);
+      }
+    } catch {
+      res.status(HttpStatus.FORBIDDEN).send();
     }
   }
 

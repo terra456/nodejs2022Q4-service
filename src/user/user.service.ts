@@ -10,7 +10,7 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<User | null> {
     const d = Date.now() - 1000;
-    return await this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         ...createUserDto,
         version: 1,
@@ -18,6 +18,25 @@ export class UserService {
         updatedAt: new Date(d),
       },
     });
+    await this.addFavs(user.id);
+    return user;
+  }
+
+  async addFavs(id: string) {
+    console.log(id);
+    await this.prisma.favorites.create({
+      data: {
+        userId: id,
+        artists: [],
+        albums: [],
+        tracks: [],
+      },
+    });
+  }
+
+  async removeFavs(id: string) {
+    console.log(id);
+    await this.prisma.favorites.delete({ where: { userId: id } });
   }
 
   async findAll(): Promise<User[]> {
@@ -48,6 +67,18 @@ export class UserService {
   }
 
   async remove(id: string) {
-    return this.prisma.user.delete({ where: { id: id } });
+    await this.removeFavs(id);
+    return this.prisma.user.delete({ where: { id } });
+  }
+
+  async removeMany() {
+    const deleteUsers = await this.prisma.user.deleteMany({
+      where: {
+        login: {
+          contains: 'TEST',
+        },
+      },
+    });
+    return deleteUsers;
   }
 }
