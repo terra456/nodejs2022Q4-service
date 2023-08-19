@@ -11,7 +11,8 @@ import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from './logger/logger.module';
 import LoggerMiddleware from './logger/logger.middleware';
 import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './filters/http-exception.filter';
+// import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { AllExceptionsFilter } from './filters/ all-exceptions.filter';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
     AppService,
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
+      useClass: AllExceptionsFilter,
     },
   ],
 })

@@ -47,6 +47,7 @@ export class CustomLogger implements LoggerService {
         );
       });
   }
+  
   private async writeErrors(message: string) {
     access('./logs-error.txt', constants.R_OK | constants.W_OK)
       .then(() => {

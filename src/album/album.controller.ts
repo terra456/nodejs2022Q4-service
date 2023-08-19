@@ -10,22 +10,20 @@ import {
   HttpStatus,
   ParseUUIDPipe,
   Put,
+  NotFoundException,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Response } from 'express';
+import { UuidValidator } from 'src/validator/uuid.validator';
 
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  async create(
-    @Body(new ValidationPipe({ skipMissingProperties: true }))
-    createAlbumDto: CreateAlbumDto,
-    @Res() res: Response,
-  ) {
+  async create(@Body() createAlbumDto: CreateAlbumDto, @Res() res: Response) {
     const newAlbum = await this.albumService.create(createAlbumDto);
     res.status(HttpStatus.CREATED).json(newAlbum);
   }
@@ -36,13 +34,10 @@ export class AlbumController {
   }
 
   @Get(':id')
-  async findOne(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Res() res: Response,
-  ) {
+  async findOne(@Param() { id }: UuidValidator, @Res() res: Response) {
     const album = await this.albumService.findOne(id);
     if (album === null) {
-      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} not found`);
+      throw new NotFoundException(`Album ${id} not found`);
     } else {
       res.status(HttpStatus.OK).json(album);
     }
@@ -50,28 +45,25 @@ export class AlbumController {
 
   @Put(':id')
   async update(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body(new ValidationPipe()) updateAlbumDto: UpdateAlbumDto,
+    @Param() { id }: UuidValidator,
+    @Body() updateAlbumDto: UpdateAlbumDto,
     @Res() res: Response,
   ) {
     try {
       const album = await this.albumService.update(id, updateAlbumDto);
       res.status(HttpStatus.OK).json(album);
     } catch {
-      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} not found`);
+      throw new NotFoundException(`Album ${id} not found`);
     }
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Res() res: Response,
-  ) {
+  async remove(@Param() { id }: UuidValidator, @Res() res: Response) {
     try {
       await this.albumService.remove(id);
       res.status(HttpStatus.NO_CONTENT).send();
     } catch {
-      res.status(HttpStatus.NOT_FOUND).send(`Album ${id} not found`);
+      throw new NotFoundException(`Album ${id} not found`);
     }
   }
 }

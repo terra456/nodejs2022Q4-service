@@ -11,12 +11,14 @@ import {
   HttpStatus,
   Put,
   Res,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { Response } from 'express';
 import { User } from '@prisma/client';
+import { UuidValidator } from '../validator/uuid.validator';
 
 function formatUserData(data: User) {
   return {
@@ -33,10 +35,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(
-    @Body(new ValidationPipe()) createUserDto: CreateUserDto,
-    @Res() res: Response,
-  ) {
+  async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     try {
       const user: User = await this.userService.create(createUserDto);
       if (user) {
@@ -59,31 +58,29 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Res() res: Response,
-  ) {
+  async findOne(@Param() { id }: UuidValidator, @Res() res: Response) {
     try {
       const user = await this.userService.findOne(id);
       if (user) {
         res.status(HttpStatus.OK).json(formatUserData(user));
       } else {
-        res.status(HttpStatus.NOT_FOUND).send(`User ${id} not found`);
+        throw new Error();
       }
     } catch {
-      res.status(HttpStatus.FORBIDDEN).send();
+      // res.status(HttpStatus.FORBIDDEN).send();
+      throw new NotFoundException({ message: `User ${id} not found` });
     }
   }
 
   @Put(':id')
   async update(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param() { id }: UuidValidator,
     @Body(new ValidationPipe()) updatePasswordDto: UpdatePasswordDto,
     @Res() res: Response,
   ) {
     const user = await this.userService.findOne(id);
     if (user === null) {
-      throw new HttpException(`User ${id} not found`, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(`User ${id} not found`);
     } else {
       if (user.password === updatePasswordDto.oldPassword) {
         const newUser = await this.userService.updatePassword(id, {
@@ -97,15 +94,12 @@ export class UserController {
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Res() res: Response,
-  ) {
+  async remove(@Param() { id }: UuidValidator, @Res() res: Response) {
     try {
       await this.userService.remove(id);
       res.status(HttpStatus.NO_CONTENT).send();
     } catch {
-      res.status(HttpStatus.NOT_FOUND).send(`User ${id} not found`);
+      throw new NotFoundException(`User ${id} not found`);
     }
   }
 }
