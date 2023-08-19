@@ -5,6 +5,7 @@ import { CustomLogger } from './logger/custom-logger.service';
 import { LogLevel, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { AllExceptionsFilter } from './filters/ all-exceptions.filter';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 const PORT = process.env.PORT || 4000;
 const LOG_LEVEL = process.env.LOG_LEVEL || 0;
@@ -20,6 +21,15 @@ async function bootstrap() {
     bufferLogs: true,
     logger: logsArr.slice(0, logLevel),
   });
+
+  const config = new DocumentBuilder()
+    .setTitle('Home Library Servise')
+    .setDescription('The service API description')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('doc', app, document);
+
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalPipes(new ValidationPipe({ disableErrorMessages: false }));
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
