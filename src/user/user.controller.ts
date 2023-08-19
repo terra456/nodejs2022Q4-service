@@ -12,6 +12,7 @@ import {
   Put,
   Res,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,6 +20,11 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { Response } from 'express';
 import { User } from '@prisma/client';
 import { UuidValidator } from '../validator/uuid.validator';
+import 'dotenv/config';
+
+import * as bcrypt from 'bcrypt';
+
+const saltOrRounds = Number(process.env.CRYPT_SALT) | 10;
 
 function formatUserData(data: User) {
   return {
@@ -37,7 +43,11 @@ export class UserController {
   @Post()
   async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     try {
-      const user: User = await this.userService.create(createUserDto);
+      const password = await bcrypt.hash(createUserDto.password, saltOrRounds);
+      const user: User = await this.userService.create({
+        ...createUserDto,
+        password,
+      });
       if (user) {
         console.log(user);
         res.status(HttpStatus.CREATED).json(formatUserData(user));
@@ -67,7 +77,6 @@ export class UserController {
         throw new Error();
       }
     } catch {
-      // res.status(HttpStatus.FORBIDDEN).send();
       throw new NotFoundException({ message: `User ${id} not found` });
     }
   }
@@ -82,13 +91,17 @@ export class UserController {
     if (user === null) {
       throw new NotFoundException(`User ${id} not found`);
     } else {
-      if (user.password === updatePasswordDto.oldPassword) {
+      if (await bcrypt.compare(updatePasswordDto.oldPassword, user.password)) {
+        const newPassword = await bcrypt.hash(
+          updatePasswordDto.newPassword,
+          saltOrRounds,
+        );
         const newUser = await this.userService.updatePassword(id, {
-          password: updatePasswordDto.newPassword,
+          password: newPassword,
         });
         res.status(HttpStatus.OK).json(formatUserData(newUser));
       } else {
-        throw new HttpException(`Password is wrong`, HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(`Password is wrong`);
       }
     }
   }
