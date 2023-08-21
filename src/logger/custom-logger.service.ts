@@ -27,12 +27,16 @@ export class CustomLogger implements LoggerService {
   /**
    * Write a 'debug' level log.
    */
-  debug?(message: any, ...optionalParams: any[]) {}
+  debug?(message: any, ...optionalParams: any[]) {
+    this.writeInFile('debug: ' + message);
+  }
 
   /**
    * Write a 'verbose' level log.
    */
-  verbose?(message: any, ...optionalParams: any[]) {}
+  verbose?(message: any, ...optionalParams: any[]) {
+    this.writeInFile('verbose: ' + message);
+  }
 
   private async writeInFile(message: string) {
     access('./logs.txt', constants.R_OK | constants.W_OK)
@@ -47,7 +51,7 @@ export class CustomLogger implements LoggerService {
         );
       });
   }
-  
+
   private async writeErrors(message: string) {
     access('./logs-error.txt', constants.R_OK | constants.W_OK)
       .then(() => {

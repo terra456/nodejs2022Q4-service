@@ -30,7 +30,6 @@ services:
       - postgres-network
     volumes:
       - ./src:/app/src
-      - ./app-logs:/var/lib/next-docker/data
 
 # This conteiner is need for check data in BD in web interface
 
@@ -50,8 +49,6 @@ services:
 
 volumes:
     pgdata:
-      external: true
-    app-logs:
       external: true
 
 networks:
