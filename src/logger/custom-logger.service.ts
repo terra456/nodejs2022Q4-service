@@ -45,24 +45,18 @@ export class CustomLogger implements LoggerService {
           process.stdout.write(message + '\n'),
         );
       })
-      .catch((e) => {
-        writeFile('./logs.txt', message + '\n').then(() =>
-          console.log('file created'),
-        );
+      .catch(() => {
+        writeFile('./logs.txt', message + '\n');
       });
   }
 
   private async writeErrors(message: string) {
     access('./logs-error.txt', constants.R_OK | constants.W_OK)
       .then(() => {
-        appendFile('./logs-error.txt', message + '\n').then(() =>
-          process.stdout.write(message + '\n'),
-        );
+        appendFile('./logs-error.txt', message + '\n');
       })
-      .catch((e) => {
-        writeFile('./logs-error.txt', message + '\n').then(() =>
-          console.log('file created'),
-        );
+      .catch(() => {
+        writeFile('./logs-error.txt', message + '\n');
       });
   }
 }

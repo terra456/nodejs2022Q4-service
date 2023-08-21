@@ -30,20 +30,26 @@ Rename .env.copy file to .env
 mv .env.copy .env
 ```
 
-Create volume for postgress DB
-```
-docker volume create --name=pgdata
-```
-
-If will be an error "Permission denied" at next step change access permissions
-```
-sudo chmod -R 777 pgdata
-```
-
 Build an image
 ```
 docker-compose up --build
 ```
+
+If error can be with volume for postgress DB
+```
+docker volume create --name=pgdata
+```
+
+If will be an error "Permission denied" during building change access permissions
+```
+sudo chmod -R 777 pgdata
+```
+
+## Logging errors
+
+Errors are loged inside the app conteiner.
+./app/logs.txt
+./app/logs-error.txt
 
 ## Testing
 

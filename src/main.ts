@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import 'dotenv/config';
 import { CustomLogger } from './logger/custom-logger.service';
 import { LogLevel, ValidationPipe } from '@nestjs/common';
-import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { AllExceptionsFilter } from './filters/ all-exceptions.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 

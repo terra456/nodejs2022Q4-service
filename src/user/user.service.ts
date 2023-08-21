@@ -23,7 +23,6 @@ export class UserService {
   }
 
   async addFavs(id: string) {
-    console.log(id);
     await this.prisma.favorites.create({
       data: {
         userId: id,
@@ -35,7 +34,6 @@ export class UserService {
   }
 
   async removeFavs(id: string) {
-    console.log(id);
     await this.prisma.favorites.delete({ where: { userId: id } });
   }
 

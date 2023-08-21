@@ -15,7 +15,7 @@ services:
       - postgres-network
 
   app:
-    image: next-docker
+    image: nest-docker
     build:
       context: .
       dockerfile: Dockerfile

@@ -5,9 +5,7 @@ import {
   Body,
   Param,
   Delete,
-  ParseUUIDPipe,
   ValidationPipe,
-  HttpException,
   HttpStatus,
   Put,
   Res,
@@ -49,7 +47,6 @@ export class UserController {
         password,
       });
       if (user) {
-        console.log(user);
         res.status(HttpStatus.CREATED).json(formatUserData(user));
       } else {
         res.status(HttpStatus.FORBIDDEN).send();
